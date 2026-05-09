@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Distortionz Tow Job</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <div id="hud" class="hidden">
+        <div class="hud-card">
+            <div class="hud-header">
+                <div class="hud-icon">🛻</div>
+                <div>
+                    <p class="eyebrow">Tow Dispatch</p>
+                    <h2 id="hudTitle">Standing By</h2>
+                </div>
+            </div>
+
+            <div id="hudWaiting" class="hud-row">
+                <span>Status</span>
+                <strong id="waitingStatus">Awaiting call…</strong>
+            </div>
+
+            <div id="hudCall" class="hud-call hidden">
+                <div class="hud-row">
+                    <span>Location</span>
+                    <strong id="callLabel">—</strong>
+                </div>
+                <div class="hud-row">
+                    <span>Vehicle</span>
+                    <strong id="callModel">—</strong>
+                </div>
+                <div class="hud-row">
+                    <span>Plate</span>
+                    <strong id="callPlate">—</strong>
+                </div>
+                <div class="hud-block">
+                    <span class="block-label">Reason</span>
+                    <p id="callReason">—</p>
+                </div>
+                <div class="hud-row">
+                    <span id="phaseLabel">Phase</span>
+                    <strong id="phaseValue">Locate</strong>
+                </div>
+            </div>
+
+            <div class="brand-footer">
+                <div class="brand-row">
+                    <span class="brand-name">Distortionz Tow Job</span>
+                    <span class="brand-version" id="brandVersion">v0.0.0</span>
+                </div>
+                <a href="#" target="_blank" rel="noopener" class="brand-link" id="brandLink">Check GitHub for updates</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="spawner" class="hidden">
+        <div class="spawner-backdrop"></div>
+        <div class="spawner-panel">
+            <header class="spawner-header">
+                <div>
+                    <p class="eyebrow">Tow Equipment</p>
+                    <h2>Place Equipment</h2>
+                    <p class="spawner-help">Pick an item, then <strong>Left&nbsp;Click</strong> to place · <strong>Right&nbsp;Click</strong> to cancel · <strong>Q</strong> / <strong>E</strong> to rotate</p>
+                </div>
+                <button id="spawnerClose" class="spawner-close">×</button>
+            </header>
+
+            <div class="spawner-grid" id="spawnerGrid"></div>
+        </div>
+    </div>
+
+    <audio id="chirpOpen"  preload="auto"></audio>
+    <audio id="chirpClose" preload="auto"></audio>
+
+    <script src="app.js"></script>
+</body>
+</html>
