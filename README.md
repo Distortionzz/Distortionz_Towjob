@@ -52,20 +52,23 @@ A complete, hand-built tow job script. Players clock on at a real-world yard ped
 | `ox_target` | yes | Ped clock-on options + vehicle hook + placed-item pickup |
 | `qbx_vehiclekeys` | recommended | Flatbed key grant (else engine cuts on entry) |
 | `distortionz_notify` | optional | Branded notifications (else falls back to `ox_lib` notify) |
-| `f550rollback` (or any flatbed) | optional | Default vehicle model — swap in `Config.Flatbed.model` |
+| `f550rollback` | **bundled** | Default flatbed model — ships in this zip. Swap in `Config.Flatbed.model` if you prefer your own. |
 
 ## Installation
 
+The zip ships with **two folders**: the script itself and the bundled flatbed addon. Drop both into your server.
+
 ```bash
-# 1. Drop the folder
-F:\txData\<server>\resources\[distortionz]\distortionz_towjob\
+# 1. Drop the folders into your resources directory
+<server>/resources/[distortionz]/distortionz_towjob/
+<server>/resources/[distortionz]/f550rollback/        # bundled flatbed addon
 
 # 2. Add to server.cfg (after qbx_core, ox_lib, ox_target are ensured)
+ensure f550rollback         # vehicle addon — must load BEFORE the script
 ensure distortionz_towjob
-
-# 3. (optional) ensure your flatbed addon BEFORE this script
-ensure f550rollback
 ```
+
+If you want a different flatbed, change `Config.Flatbed.model` in `config.lua` to the spawn name of your preferred vehicle (e.g. stock `flatbed`, or any other addon you've installed). You can then leave out the `ensure f550rollback` line.
 
 ## Configuration
 
@@ -143,10 +146,11 @@ Set `Config.VersionCheck.enabled = true` (default) and `distortionz_towjob` will
 
 ## Credits
 
-- **Author:** Distortionz
+- **Script:** Distortionz
 - **Framework:** [Qbox Project](https://github.com/Qbox-project)
 - **Patterns:** ox_lib, ox_target, qbx_core, qbx_vehiclekeys
+- **Bundled flatbed model (`f550rollback`):** **Scorpionfam** — `[NON-ELS][ELS][Addon][FiveM-Ready] F550 Rollback` v1.1.0 — [original page on lcpdfr.com](https://www.lcpdfr.com/downloads/gta5mods/vehiclemodels/50437-non-elselsaddonfivem-ready-f550-rollback/). All credit for the model goes to Scorpionfam; please honor the original author's terms.
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+The script itself is released under MIT — see [LICENSE](LICENSE). The bundled `f550rollback` vehicle addon retains its original author's license; this script's MIT license does **not** extend to that asset.
