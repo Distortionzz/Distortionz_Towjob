@@ -10,6 +10,12 @@ local activeCall      = nil   -- { spawn, model, plate, label, vehicle, blip, ti
 local pickedUp        = false
 local pickupCoords    = nil   -- vec3 of where the player attached the car (for distance bonus)
 
+-- Forward declarations for functions defined later in the file but
+-- referenced from earlier event handlers. Without these the closures
+-- look up the symbols as globals and find nil at call time.
+local CleanupAllPlacedObjects
+local SetSpawnerNuiOpen
+
 -- ─── Notify wrapper ─────────────────────────────────────────────────
 
 local function Notify(message, notifyType, duration, title)
@@ -273,6 +279,21 @@ end
 
 -- ─── Attach / detach (flatbed lift) ─────────────────────────────────
 
+-- Returns the attach offset for a given towed vehicle. Looks up the
+-- model in Config.Attach.modelOverrides first; falls back to the default.
+local function GetAttachOffset(targetVeh)
+    local default = (Config.Attach and Config.Attach.offset) or { x = 0.0, y = -2.6, z = 1.0 }
+    local overrides = (Config.Attach and Config.Attach.modelOverrides) or {}
+
+    local model = GetEntityModel(targetVeh)
+    for name, off in pairs(overrides) do
+        if joaat(name) == model then
+            return off
+        end
+    end
+    return default
+end
+
 local function AttachToFlatbed(targetVeh)
     if not flatbed or not DoesEntityExist(flatbed) then
         Notify('You need a flatbed nearby to hook the vehicle.', 'warning', 5000)
@@ -286,8 +307,8 @@ local function AttachToFlatbed(targetVeh)
         return false
     end
 
-    -- Attach behind the flatbed
-    local off = (Config.Attach and Config.Attach.offset) or { x = 0.0, y = -2.6, z = 1.0 }
+    -- Attach behind the flatbed (per-model offset if available)
+    local off = GetAttachOffset(targetVeh)
     AttachEntityToEntity(targetVeh, flatbed,
         0,
         off.x, off.y, off.z,
@@ -641,7 +662,7 @@ local function FindSpawnerItem(id)
     return nil
 end
 
-local function SetSpawnerNuiOpen(open)
+function SetSpawnerNuiOpen(open)  -- assigns to forward-declared upvalue
     spawnerOpen = open
     SetNuiFocus(open, open)
     if open then
@@ -804,7 +825,7 @@ local function StartPlacement(itemId)
     CreateThread(function() PlacementLoop(item) end)
 end
 
-local function CleanupAllPlacedObjects()
+function CleanupAllPlacedObjects()  -- assigns to forward-declared upvalue
     for _, obj in ipairs(placedObjects) do
         if obj and DoesEntityExist(obj) then
             pcall(function()
@@ -841,11 +862,32 @@ TriggerEvent('chat:addSuggestion', '/' .. (Config.Spawner.command or 'towjob'),
 
 -- ─── Boot / cleanup ─────────────────────────────────────────────────
 
+-- ─── State reset helper ─────────────────────────────────────────────
+-- Forces a clean local state. Used on resource boot, character spawn,
+-- and player-loaded events so a stale HUD never lingers after a
+-- reconnect or character switch.
+local function ResetClientState()
+    onDuty       = false
+    pickedUp     = false
+    pickupCoords = nil
+    spawnerOpen  = false
+    placing      = false
+    HudHide()
+    if lib and lib.hideTextUI then lib.hideTextUI() end
+end
+
 CreateThread(function()
     Wait(1500)
     CreateYardBlip()
     SpawnYardPed()
+    ResetClientState()  -- ensure HUD/textUI start hidden
 end)
+
+-- Re-sync state when the player (re)spawns or qbx_core finishes loading
+-- the player object — covers reconnects, /reset, character changes.
+AddEventHandler('playerSpawned', function() ResetClientState() end)
+RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function() ResetClientState() end)
+RegisterNetEvent('qbx_core:client:playerLoaded',  function() ResetClientState() end)
 
 AddEventHandler('onResourceStop', function(resourceName)
     if resourceName ~= GetCurrentResourceName() then return end

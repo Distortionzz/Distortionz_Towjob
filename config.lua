@@ -5,7 +5,7 @@ Config.Debug = false
 -- ─── Script meta ────────────────────────────────────────────────────
 Config.Script = {
     name    = 'Distortionz Tow Job',
-    version = '1.2.0',
+    version = '1.2.1',
 }
 Config.CurrentVersion = Config.Script.version
 
@@ -140,9 +140,38 @@ Config.Attach = {
     -- tight — bumpers can be touching with centres still ~7m apart.
     maxDistance = 10.0,
 
-    -- Where the hooked vehicle sits relative to the flatbed centre
-    -- (offsets in metres). y is forward, so negative is towards the rear bed.
+    -- Default attach offset relative to the flatbed centre (metres).
+    -- y < 0 = towards the rear bed.
+    -- Used when the towed vehicle is NOT in modelOverrides below.
     offset = { x = 0.0, y = -2.6, z = 1.0 },
+
+    -- Per-model offsets — fixes vehicles that float / clip on the bed.
+    -- Tall SUVs/trucks usually need higher z; small/sports cars lower.
+    -- Tune in-game and add entries here. Lookup uses joaat(name) == model.
+    --
+    -- Workflow: spawn a call, hook the car, eyeball the alignment, then
+    -- adjust z by ±0.05 increments until it sits flush. Save → restart.
+    modelOverrides = {
+        -- Tall SUVs / pickups (sit higher)
+        ['cavalcade'] = { x = 0.0, y = -2.6, z = 1.20 },
+        ['granger']   = { x = 0.0, y = -2.6, z = 1.25 },
+        ['baller']    = { x = 0.0, y = -2.6, z = 1.15 },
+        ['bobcatxl']  = { x = 0.0, y = -2.6, z = 1.20 },
+
+        -- Small / low-slung cars (sit lower)
+        ['blista']     = { x = 0.0, y = -2.6, z = 0.85 },
+        ['panto']      = { x = 0.0, y = -2.6, z = 0.75 },
+        ['dilettante'] = { x = 0.0, y = -2.6, z = 0.85 },
+
+        -- Sports / coupes
+        ['felon']    = { x = 0.0, y = -2.6, z = 0.90 },
+        ['sentinel'] = { x = 0.0, y = -2.6, z = 0.90 },
+        ['fugitive'] = { x = 0.0, y = -2.6, z = 0.95 },
+
+        -- Wagons (slightly under default)
+        ['ingot']    = { x = 0.0, y = -2.6, z = 0.95 },
+        ['stratum']  = { x = 0.0, y = -2.6, z = 0.95 },
+    },
 }
 
 -- ─── Dispatch / call timing ─────────────────────────────────────────
