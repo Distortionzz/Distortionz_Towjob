@@ -244,18 +244,26 @@ end)
 
 -- ─── Cancel current call (player rejected / wants to skip) ──────────
 
-RegisterNetEvent('distortionz_towjob:server:cancelCall', function()
+RegisterNetEvent('distortionz_towjob:server:cancelCall', function(opts)
     local src = source
     local job = jobs[src]
     if not job or not job.onDuty then return end
 
+    local noAccess = type(opts) == 'table' and opts.noAccess == true
+    local cooldown = noAccess
+        and (Config.Dispatch.noAccessCooldownSeconds or Config.Dispatch.callCooldownSeconds)
+        or Config.Dispatch.callCooldownSeconds
+
     job.call       = nil
     job.pickedUp   = false
-    job.nextCallAt = os.time() + Config.Dispatch.callCooldownSeconds
+    job.nextCallAt = os.time() + cooldown
 
     TriggerClientEvent('distortionz_towjob:client:callCancelled', src, {
-        reason          = 'Call dismissed. Dispatch will try again shortly.',
-        nextCallSeconds = Config.Dispatch.callCooldownSeconds,
+        reason          = noAccess
+            and '10-99 — vehicle inaccessible. Returning to standby.'
+            or  'Call dismissed. Dispatch will try again shortly.',
+        nextCallSeconds = cooldown,
+        noAccess        = noAccess,
     })
 end)
 

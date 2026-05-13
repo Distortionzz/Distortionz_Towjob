@@ -5,7 +5,7 @@ Config.Debug = false
 -- ─── Script meta ────────────────────────────────────────────────────
 Config.Script = {
     name    = 'Distortionz Tow Job',
-    version = '1.2.1',
+    version = '1.2.3',
 }
 Config.CurrentVersion = Config.Script.version
 
@@ -49,6 +49,9 @@ Config.Audio = {
 
     -- Phrase template. {location} {model} {plate} {reason} are substituted.
     voiceTemplate = 'Attention available tow unit. Ten eighty six at {location}. Vehicle is a {model}, plate {plate}. {reason}. Respond.',
+
+    -- Acknowledgment line played after a /tow99 (10-99, no-access). No vars.
+    noAccessTemplate = 'Ten four. Marking tow unit ten ninety nine. Vehicle inaccessible. Standby for next call.',
 }
 
 -- ─── Tow yard ───────────────────────────────────────────────────────
@@ -58,7 +61,7 @@ Config.Yard = {
     ped = {
         enabled  = true,
         model    = 's_m_y_dockwork_01',
-        coords   = vec4(409.0, -1623.0, 29.29, 226.0),
+        coords   = vec4(409.51, -1623.26, 28.29, 228.2),
         scenario = 'WORLD_HUMAN_CLIPBOARD',
     },
 
@@ -106,7 +109,7 @@ Config.Spawner = {
     chatSuggest   = 'Open the tow equipment placer',
 
     -- Max distance (metres) the placement preview can be from the player
-    rayDistance   = 7.5,
+    rayDistance   = 15.0,
 
     -- Rotation step (degrees) for Q / E
     rotateStep    = 15.0,
@@ -179,6 +182,11 @@ Config.Dispatch = {
     -- Seconds between dispatch calls (police-call cadence)
     callCooldownSeconds = 20,
 
+    -- Seconds before another call is issued after a /tow99 (no-access)
+    -- cancellation. Longer than callCooldownSeconds so it isn't a free
+    -- reroll when a driver doesn't like the call.
+    noAccessCooldownSeconds = 45,
+
     -- Map blip on the abandoned vehicle
     blipSprite = 67,
     blipColor  = 5,
@@ -197,7 +205,7 @@ Config.SpawnPool = {
     { coords = vec4(-1187.32, -1518.60, 4.35,  35.0),  label = 'Vespucci Beach' },
     { coords = vec4(1216.88, -1413.52, 35.22, 270.0),  label = 'El Burro Heights alley' },
     { coords = vec4(196.13, -1671.81, 29.34,   140.0), label = 'Davis residential' },
-    { coords = vec4(-274.20, -2025.30, 30.12,  150.0), label = 'Cypress Flats lot' },
+    { coords = vec4(-218.91, -2038.21, 26.62,  239.7), label = 'Cypress Flats lot' },
     { coords = vec4(-1178.74, -1510.83, 2.83,  123.3), label = 'Del Perro Pier' },
     { coords = vec4(-44.89,  -1460.59, 30.25,  94.1),  label = 'Strawberry alley' },
     { coords = vec4(-1087.96, -885.79, 2.21,   215.0), label = 'Morningwood' },

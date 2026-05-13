@@ -131,7 +131,14 @@ local function SpawnYardPed()
     lib.requestModel(hash, 10000)
 
     local c = pedConfig.coords
-    yardPed = CreatePed(0, hash, c.x, c.y, c.z - 1.0, c.w, false, false)
+    -- Ground-snap: ask the engine for the actual ground Z at this XY and use
+    -- it when collisions are loaded, so a slightly-off config Z doesn't leave
+    -- the ped floating (or sunk). Falls back to the configured Z if the chunk
+    -- isn't streamed in yet at boot.
+    RequestCollisionAtCoord(c.x, c.y, c.z)
+    local foundGround, groundZ = GetGroundZFor_3dCoord(c.x, c.y, c.z + 2.0, false)
+    local spawnZ = foundGround and groundZ or c.z
+    yardPed = CreatePed(0, hash, c.x, c.y, spawnZ, c.w, false, false)
     SetEntityInvincible(yardPed, true)
     SetBlockingOfNonTemporaryEvents(yardPed, true)
     FreezeEntityPosition(yardPed, true)
@@ -645,6 +652,28 @@ RegisterNetEvent('distortionz_towjob:client:callCancelled', function(payload)
         Notify(payload.reason, 'warning', 6000)
     end
 
+    -- 10-4 dispatch acknowledgment for /tow99 cancellations. Reuses the
+    -- existing dispatchAudio pipeline (chirp + TTS) with the no-access
+    -- template (no variable substitution).
+    if payload and payload.noAccess and Config.Audio and Config.Audio.enabled then
+        SendNUIMessage({
+            action = 'dispatchAudio',
+            data = {
+                chirps      = Config.Audio.chirps,
+                chirpOpen   = Config.Audio.chirpOpen,
+                chirpClose  = Config.Audio.chirpClose,
+                chirpVolume = Config.Audio.chirpVolume,
+                voice       = Config.Audio.voice,
+                voiceRate   = Config.Audio.voiceRate,
+                voicePitch  = Config.Audio.voicePitch,
+                voiceVolume = Config.Audio.voiceVolume,
+                voicePrefer = Config.Audio.voicePrefer,
+                template    = Config.Audio.noAccessTemplate
+                              or 'Ten four. Tow unit ten ninety nine. Standby.',
+            },
+        })
+    end
+
     HudUpdate(HudSnapshot())
 end)
 
@@ -853,12 +882,33 @@ RegisterCommand(Config.Spawner.command or 'towjob', function()
         Notify('Clock on at the dispatcher first.', 'warning', 5000)
         return
     end
+    if IsPedInAnyVehicle(PlayerPedId(), false) then
+        Notify('Step out of the vehicle to place equipment.', 'warning', 4000)
+        return
+    end
     if placing or spawnerOpen then return end
     SetSpawnerNuiOpen(true)
 end, false)
 
 TriggerEvent('chat:addSuggestion', '/' .. (Config.Spawner.command or 'towjob'),
     Config.Spawner.chatSuggest or 'Open the tow equipment placer')
+
+-- /tow99 — radio dispatch that the current call is inaccessible (no-go).
+-- Cancels the active call with a distinct message and a longer cooldown
+-- than a normal skip, so it isn't a free reroll.
+RegisterCommand('tow99', function()
+    if not onDuty then
+        Notify('Clock on at the dispatcher first.', 'warning', 5000)
+        return
+    end
+    if not activeCall then
+        Notify('No active call to cancel.', 'warning', 4000)
+        return
+    end
+    TriggerServerEvent('distortionz_towjob:server:cancelCall', { noAccess = true })
+end, false)
+
+TriggerEvent('chat:addSuggestion', '/tow99', 'cancel current tow call')
 
 -- ─── Boot / cleanup ─────────────────────────────────────────────────
 

@@ -4,7 +4,7 @@ lua54 'yes'
 
 author 'Distortionz'
 description 'Distortionz Tow Job - Premium tow operator job with dispatch calls, flatbed handout, and yard-delivery payout.'
-version '1.2.1'
+version '1.2.3'
 repository 'https://github.com/Distortionzz/Distortionz_Towjob'
 
 ui_page 'html/index.html'
